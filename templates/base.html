@@ -4,6 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}Orange and Olive Co.{% endblock %}</title>
+    {% block meta %}
+    <meta name="description" content="{{ site_description }}" />
+    <meta property="og:title" content="Orange and Olive Co." />
+    <meta property="og:description" content="{{site_description}}" />
+    <meta property="og:image" content="{{site_url}}/static/logo.jpg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="{{site_url}}" />
+    {% endblock %}
     <link rel="stylesheet" href="static/style.css" />
     <link rel="icon" href="static/logo.jpg" type="image/jpeg" />
   </head>

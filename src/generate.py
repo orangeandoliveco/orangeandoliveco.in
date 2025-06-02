@@ -15,6 +15,10 @@ from constants import (
     ASSETS_DIR,
     DATA_IMAGES_DIR,
     CATEGORIES,
+    SITE_NAME,
+    SITE_SUBTITLE,
+    SITE_DESCRIPTION,
+    SITE_URL,
 )
 
 
@@ -100,7 +104,12 @@ def generate_site(csv_path: Path, output_path: Path) -> None:
 
     # Render index.html to output directory
     index_template = env.get_template("index.html")
-    index_html = index_template.render()
+    index_html = index_template.render(
+        site_name=SITE_NAME,
+        site_subtitle=SITE_SUBTITLE,
+        site_description=SITE_DESCRIPTION,
+        site_url=SITE_URL,
+    )
     (output_path / "index.html").write_text(index_html, encoding="utf-8")
 
     # Make item pages
