@@ -78,6 +78,10 @@ def generate_site(csv_path: Path, output_path: Path) -> None:
     loader = jinja2.FileSystemLoader(searchpath=TEMPLATE_DIR)
     env = jinja2.Environment(loader=loader)
 
+    # Clean up the output directory
+    if output_path.exists():
+        shutil.rmtree(output_path)
+
     # Copy assets to output directory
     static_dir = output_path / "static"
     static_dir.mkdir(parents=True, exist_ok=True)
@@ -104,6 +108,8 @@ def generate_site(csv_path: Path, output_path: Path) -> None:
     with csv_path.open("r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
+            if row["show"].lower()[:1] != "y":
+                continue
             try:
                 item = MenuItem(**row)
             except ValidationError as e:
