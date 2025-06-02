@@ -64,6 +64,7 @@ class MenuItem(BaseModel):
 
 def create_item_page(item: MenuItem, output_dir: Path, env: jinja2.Environment) -> None:
     template = env.get_template("item.html")
+    slug = item.name.lower().replace(" ", "-")
     html = template.render(
         name=item.name,
         description=item.description,
@@ -71,8 +72,11 @@ def create_item_page(item: MenuItem, output_dir: Path, env: jinja2.Environment) 
         price=item.price,
         image=item.image,
         testimonials=item.testimonials,
+        slug=slug,
+        site_name=SITE_NAME,
+        site_url=SITE_URL,
     )
-    filename = f"{item.name.lower().replace(' ', '-')}.html"
+    filename = f"{slug}.html"
     (output_dir / filename).write_text(html, encoding="utf-8")
 
 
