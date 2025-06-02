@@ -2,31 +2,44 @@ from typing import List, Dict
 from dataclasses import dataclass
 from pathlib import Path
 import csv
-import jinja2
 import shutil
+import sys
+
+import jinja2
+from pydantic import BaseModel, field_validator, Field, ValidationError
 
 from constants import MENU_CSV, DIST_DIR, TEMPLATE_DIR, ASSETS_DIR, DATA_IMAGES_DIR
 
 
-@dataclass
-class MenuItem:
+class MenuItem(BaseModel):
     name: str
     category: str
     description: str
-    price: str
+    price: int
     image: str
-    testimonials: List[str]
+    testimonials: list[str] = Field(default_factory=list)
 
+    @field_validator("price", mode="before")
+    @classmethod
+    def validate_price(cls, v: str) -> str:
+        value = v.replace("₹", "").replace(",", "").strip()
+        if not value.isdigit():
+            raise ValueError(f"Invalid price format: {v}")
+        return value
 
-def parse_csv_row(row: Dict[str, str]) -> MenuItem:
-    return MenuItem(
-        name=row["name"],
-        category=row["category"],
-        description=row["description"],
-        price=row["price"],
-        image=row["image"],
-        testimonials=[t.strip() for t in row["testimonials"].split("|") if t.strip()],
-    )
+    @field_validator("image")
+    @classmethod
+    def validate_image(cls, v: str) -> str:
+        if not v.lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
+            raise ValueError(f"Unsupported image format: {v}")
+        return v
+
+    @field_validator("testimonials", mode="before")
+    @classmethod
+    def split_testimonials(cls, v) -> List[str]:
+        if isinstance(v, str):
+            return [t.strip() for t in v.split("|") if t.strip()]
+        return v
 
 
 def create_item_page(item: MenuItem, output_dir: Path, env: jinja2.Environment) -> None:
@@ -71,12 +84,29 @@ def generate_site(csv_path: Path, output_path: Path) -> None:
     (output_path / "index.html").write_text(index_html, encoding="utf-8")
 
     # Make item pages
+    errors = []
     with csv_path.open("r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            item = parse_csv_row(row)
+            try:
+                item = MenuItem(**row)
+            except ValidationError as e:
+                errors.append(f"Validation error for row — {row['name']}: {e}")
+                continue
             create_item_page(item, output_path, env)
+
+    if errors:
+        print("Errors encountered during validation:")
+        for error in errors:
+            print(f"❌ {error}")
+
+    return errors
 
 
 if __name__ == "__main__":
-    generate_site(MENU_CSV, DIST_DIR)
+    errors = generate_site(MENU_CSV, DIST_DIR)
+    if errors:
+        print("Site generation completed with errors.")
+        sys.exit(1)
+    else:
+        print("Site generated successfully.")
