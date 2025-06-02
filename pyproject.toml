@@ -1,0 +1,10 @@
+[project]
+name = "orangeandoliveco-in"
+version = "0.1.0"
+description = "Generate the site oranngeoliveco.in"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "jinja2>=3.1.6",
+    "requests>=2.32.3",
+]
