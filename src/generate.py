@@ -8,7 +8,14 @@ import sys
 import jinja2
 from pydantic import BaseModel, field_validator, Field, ValidationError
 
-from constants import MENU_CSV, DIST_DIR, TEMPLATE_DIR, ASSETS_DIR, DATA_IMAGES_DIR
+from constants import (
+    MENU_CSV,
+    DIST_DIR,
+    TEMPLATE_DIR,
+    ASSETS_DIR,
+    DATA_IMAGES_DIR,
+    CATEGORIES,
+)
 
 
 class MenuItem(BaseModel):
@@ -26,6 +33,15 @@ class MenuItem(BaseModel):
         if not value.isdigit():
             raise ValueError(f"Invalid price format: {v}")
         return value
+
+    @field_validator("category")
+    @classmethod
+    def validate_category(cls, v: str) -> str:
+        if v not in CATEGORIES:
+            raise ValueError(
+                f"Invalid category: '{v}'. Must be one of: {', '.join(CATEGORIES)}"
+            )
+        return v
 
     @field_validator("image")
     @classmethod

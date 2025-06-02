@@ -7,3 +7,9 @@ MENU_CSV = DATA_DIR / "menu.csv"
 DIST_DIR = ROOT / "dist"
 TEMPLATE_DIR = ROOT / "templates"
 ASSETS_DIR = ROOT / "assets"
+
+CATEGORIES = [
+    "Cookies & Shortbreads",
+    "Cakes & Puddings",
+    "Granola & Pantry",
+]
