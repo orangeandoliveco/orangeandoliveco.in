@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{name}} – Orange and Olive Co.</title>
+    <link rel="stylesheet" href="static/style.css" />
+  </head>
+
+  <body>
+    <div class="container">
+      <img
+        src="static/logo.jpg"
+        alt="Orange and Olive Co. Logo"
+        class="logo-small"
+      />
+      <div class="category">{{ category }}</div>
+
+      <div class="divider"></div>
+
+      <h2 class="item-title">{{ name }}</h2>
+      <img src="images/{{ image }}" alt="{{ name }}" class="item-image" />
+      <div class="description">{{ description }}</div>
+      <div class="price">₹ {{ price }} per kg</div>
+
+      {% for testimonial in testimonials %}
+      <div class="testimonial">“{{ testimonial }}”</div>
+      {% endfor %}
+    </div>
+  </body>
+</html>
