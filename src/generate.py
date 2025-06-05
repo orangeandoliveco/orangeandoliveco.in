@@ -27,6 +27,7 @@ class MenuItem(BaseModel):
     category: str
     description: str
     price: int
+    weight_unit: str
     image: str
     testimonials: list[str] = Field(default_factory=list)
 
@@ -37,6 +38,11 @@ class MenuItem(BaseModel):
         if not value.isdigit():
             raise ValueError(f"Invalid price format: {v}")
         return value
+
+    @field_validator("weight_unit")
+    @classmethod
+    def validate_weight_unit(cls, v: str) -> str:
+        return v.strip() or "kg"
 
     @field_validator("category")
     @classmethod
@@ -70,6 +76,7 @@ def create_item_page(item: MenuItem, output_dir: Path, env: jinja2.Environment) 
         description=item.description,
         category=item.category,
         price=item.price,
+        weight_unit=item.weight_unit,
         image=item.image,
         testimonials=item.testimonials,
         slug=slug,
@@ -128,6 +135,7 @@ def generate_site(csv_path: Path, output_path: Path) -> None:
             except ValidationError as e:
                 errors.append(f"Validation error for row — {row['name']}: {e}")
                 continue
+            print(f"Creating page for {item.name}...")
             create_item_page(item, output_path, env)
 
     if errors:

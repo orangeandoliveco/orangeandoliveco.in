@@ -20,7 +20,7 @@
 <h2 class="item-title">{{ name }}</h2>
 <img src="images/{{ image }}" alt="{{ name }}" class="item-image" />
 <div class="description">{{ description }}</div>
-<div class="price">₹ {{ price }} per kg</div>
+<div class="price">₹ {{ price }} per {{ weight_unit }}</div>
 
 {% for testimonial in testimonials %}
 <div class="testimonial">“{{ testimonial }}”</div>
