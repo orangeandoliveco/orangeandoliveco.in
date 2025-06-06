@@ -20,6 +20,7 @@ from constants import (
     SITE_DESCRIPTION,
     SITE_URL,
 )
+from utils import slugify
 
 
 class MenuItem(BaseModel):
@@ -70,7 +71,7 @@ class MenuItem(BaseModel):
 
 def create_item_page(item: MenuItem, output_dir: Path, env: jinja2.Environment) -> None:
     template = env.get_template("item.html")
-    slug = item.name.lower().replace(" ", "-")
+    slug = slugify(item.name)
     html = template.render(
         name=item.name,
         description=item.description,
