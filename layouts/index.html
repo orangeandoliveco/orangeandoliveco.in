@@ -1,0 +1,9 @@
+{{ define "title" }}Menu – {{ site.Title }}{{ end }}
+
+{{ define "main" }}
+<img src="{{ "logo.jpg" | relURL }}" alt="{{ site.Title }} Logo" class="logo-large" />
+<h1 class="cover-title">{{ site.Title }}</h1>
+<h2 class="cover-subtitle">{{ site.Params.subtitle }}</h2>
+<div class="divider"></div>
+<div class="footer-text">Fresh • Wholesome • Joyful</div>
+{{ end }}

@@ -1,0 +1,27 @@
+{{ define "title" }}{{ .Title }} – {{ site.Title }}{{ end }}
+
+{{ define "meta" }}
+<meta name="description" content="{{ .Params.description }}" />
+<meta property="og:title" content="{{ .Title }} – {{ site.Title }}" />
+<meta property="og:description" content="{{ .Params.description }}" />
+<meta property="og:image" content="{{ site.BaseURL }}items/{{ .File.BaseFileName }}/{{ .Params.image }}" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="{{ .Permalink }}" />
+{{ end }}
+
+{{ define "main" }}
+<img src="{{ "static/logo.jpg" | relURL }}" alt="{{ site.Title }} Logo" class="logo-small" />
+<div class="category">{{ .Params.category }}</div>
+<div class="divider"></div>
+
+<h2 class="item-title">{{ .Title }}</h2>
+<img src="{{ .Params.image }}" alt="{{ .Title }}" class="item-image" />
+<div class="description">{{ .Params.description }}</div>
+<div class="price">₹ {{ .Params.price }} per {{ .Params.weight_unit }}</div>
+
+{{ with .Params.quotes }}
+  {{ range . }}
+<div class="testimonial">“{{ . }}”</div>
+{{ end }}
+{{ end }}
+{{ end }}

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ block "title" . }}{{ site.Title }}{{ end }}</title>
+
+    {{ block "meta" . }}
+    <meta name="description" content="{{ site.Params.description }}" />
+    <meta property="og:title" content="{{ site.Title }}" />
+    <meta property="og:description" content="{{ site.Params.description }}" />
+    <meta property="og:image" content="{{ site.BaseURL }}static/logo.jpg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="{{ site.BaseURL }}" />
+    {{ end }}
+
+    <link rel="stylesheet" href="{{ "style.css" | relURL }}" />
+    <link rel="icon" href="{{ "logo.jpg" | relURL }}" type="image/jpeg" />
+  </head>
+  <body>
+      <div class="container">
+          {{ block "main" . }}{{ end }}
+      </div>
+  </body>
+</html>
