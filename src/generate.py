@@ -88,7 +88,7 @@ def create_item_page(item: MenuItem, output_dir: Path, env: jinja2.Environment) 
     (output_dir / filename).write_text(html, encoding="utf-8")
 
 
-def generate_site(csv_path: Path, output_path: Path) -> None:
+def generate_site(csv_path: Path, output_path: Path) -> List[str]:
     output_path.mkdir(parents=True, exist_ok=True)
 
     loader = jinja2.FileSystemLoader(searchpath=TEMPLATE_DIR)
