@@ -1,30 +1,23 @@
-from typing import List, Dict
-from dataclasses import dataclass
+from typing import List
 from pathlib import Path
 import csv
 import shutil
 import sys
+import yaml
 
-import jinja2
 from pydantic import BaseModel, field_validator, Field, ValidationError
 
 from constants import (
     MENU_CSV,
-    DIST_DIR,
-    TEMPLATE_DIR,
-    ASSETS_DIR,
-    DATA_IMAGES_DIR,
+    CONTENT_DIR,
     CATEGORIES,
-    SITE_NAME,
-    SITE_SUBTITLE,
-    SITE_DESCRIPTION,
-    SITE_URL,
+    DATA_IMAGES_DIR,
 )
 from utils import slugify
 
 
 class MenuItem(BaseModel):
-    name: str
+    name: str = Field(serialization_alias="title")
     category: str
     description: str
     price: int
@@ -69,60 +62,34 @@ class MenuItem(BaseModel):
         return v
 
 
-def create_item_page(item: MenuItem, output_dir: Path, env: jinja2.Environment) -> None:
-    template = env.get_template("item.html")
+def create_item_markdown(item: MenuItem, output_dir: Path, images_dir: Path) -> None:
     slug = slugify(item.name)
-    html = template.render(
-        name=item.name,
-        description=item.description,
-        category=item.category,
-        price=item.price,
-        weight_unit=item.weight_unit,
-        image=item.image,
-        testimonials=item.testimonials,
-        slug=slug,
-        site_name=SITE_NAME,
-        site_url=SITE_URL,
-    )
-    filename = f"{slug}.html"
-    (output_dir / filename).write_text(html, encoding="utf-8")
+    item_dir = output_dir / slug
+    item_dir.mkdir(parents=True, exist_ok=True)
+
+    src_image_path = images_dir / item.image
+    dst_image_path = item_dir / item.image
+    if src_image_path.exists():
+        shutil.copy(src_image_path, dst_image_path)
+    else:
+        print(f"⚠ Image {src_image_path} not found.")
+
+    front_matter = item.model_dump(by_alias=True, exclude_none=True)
+    markdown = f"---\n{yaml.dump(front_matter, sort_keys=False)}---\n\n"
+    markdown += f"{item.description}\n\n"
+
+    with (item_dir / f"index.md").open("w", encoding="utf-8") as f:
+        f.write(markdown)
 
 
-def generate_site(csv_path: Path, output_path: Path) -> List[str]:
-    output_path.mkdir(parents=True, exist_ok=True)
+def generate_site_content(
+    csv_path: Path, content_path: Path, images_dir: Path
+) -> List[str]:
+    content_path.mkdir(parents=True, exist_ok=True)
 
-    loader = jinja2.FileSystemLoader(searchpath=TEMPLATE_DIR)
-    env = jinja2.Environment(loader=loader)
-
-    # Clean up the output directory
-    if output_path.exists():
-        shutil.rmtree(output_path)
-
-    # Copy assets to output directory
-    static_dir = output_path / "static"
-    static_dir.mkdir(parents=True, exist_ok=True)
-    for asset in ASSETS_DIR.glob("*"):
-        if asset.is_file():
-            target_path = static_dir / asset.name
-            shutil.copy(asset, target_path)
-
-    # Copy images from data/images to output directory
-    images_dir = output_path / "images"
-    images_dir.mkdir(exist_ok=True)
-    for image in DATA_IMAGES_DIR.glob("*"):
-        if image.is_file():
-            target_path = images_dir / image.name
-            shutil.copy(image, target_path)
-
-    # Render index.html to output directory
-    index_template = env.get_template("index.html")
-    index_html = index_template.render(
-        site_name=SITE_NAME,
-        site_subtitle=SITE_SUBTITLE,
-        site_description=SITE_DESCRIPTION,
-        site_url=SITE_URL,
-    )
-    (output_path / "index.html").write_text(index_html, encoding="utf-8")
+    # Clean up the content directory
+    if content_path.exists():
+        shutil.rmtree(content_path)
 
     # Make item pages
     errors = []
@@ -137,7 +104,7 @@ def generate_site(csv_path: Path, output_path: Path) -> List[str]:
                 errors.append(f"Validation error for row — {row['name']}: {e}")
                 continue
             print(f"Creating page for {item.name}...")
-            create_item_page(item, output_path, env)
+            create_item_markdown(item, content_path / "items", images_dir)
 
     if errors:
         print("Errors encountered during validation:")
@@ -148,7 +115,7 @@ def generate_site(csv_path: Path, output_path: Path) -> List[str]:
 
 
 if __name__ == "__main__":
-    errors = generate_site(MENU_CSV, DIST_DIR)
+    errors = generate_site_content(MENU_CSV, CONTENT_DIR, DATA_IMAGES_DIR)
     if errors:
         print("Site generation completed with errors.")
         sys.exit(1)
