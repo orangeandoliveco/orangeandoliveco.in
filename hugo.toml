@@ -1,3 +1,10 @@
 baseURL = 'https://orangeandoliveco.in/'
 languageCode = 'en-us'
 title = 'Orange and Olive Co.'
+
+[params]
+description = """
+Orange and Olive Co. is a home bakery in New Delhi, India, specializing in
+artisan cookies, cakes, and granola. We offer a range of delicious treats made
+with love and the finest ingredients.
+"""
