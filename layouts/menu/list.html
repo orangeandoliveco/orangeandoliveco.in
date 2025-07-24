@@ -1,0 +1,19 @@
+{{ define "title" }}Menu – {{ site.Title }}{{ end }}
+
+{{ define "main" }}
+<img src="{{ "logo.jpg" | relURL }}" alt="{{ site.Title }} Logo" class="logo-small" />
+<h1 class="cover-title">Menu</h1>
+<div class="divider"></div>
+
+<div class="menu-items">
+  {{ range where .Site.RegularPages "Section" "items" }}
+    <div class="menu-card">
+      <a href="{{ .RelPermalink }}">
+        <h2 class="menu-name">{{ .Title }}</h2>
+      </a>
+      <div class="menu-description">{{ .Params.description }}</div>
+      <div class="menu-price">₹ {{ .Params.price }} / {{ .Params.weight_unit }}</div>
+    </div>
+    {{ end }}
+</div>
+{{ end }}

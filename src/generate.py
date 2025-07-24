@@ -106,6 +106,14 @@ def generate_site_content(
             print(f"Creating page for {item.name}...")
             create_item_markdown(item, content_path / "items", images_dir)
 
+    # Make menu page
+    menu_dir = content_path / "menu"
+    menu_dir.mkdir(parents=True, exist_ok=True)
+    with (menu_dir / "_index.md").open("w", encoding="utf-8") as f:
+        f.write("---\n")
+        f.write("title: Our Menu\n")
+        f.write("---\n\n")
+
     if errors:
         print("Errors encountered during validation:")
         for error in errors:
