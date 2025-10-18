@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent.absolute()
@@ -16,11 +15,3 @@ CATEGORIES = [
 ]
 
 MAX_IMAGE_SIZE = 1 * 1024 * 1024  # 1MB
-SITE_URL = "https://punchagan.github.io/experiri"
-SITE_NAME = "Orange and Olive Co."
-SITE_SUBTITLE = "Handcrafted Cakes, Cookies & Granola"
-SITE_DESCRIPTION = """
-Orange and Olive Co. is a home bakery in New Delhi, India, specializing in
-artisan cookies, cakes, and granola. We offer a range of delicious treats made
-with love and the finest ingredients.
-"""
