@@ -34,9 +34,7 @@ jobs:
         env:
           SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
         run: |
-          uv run python src/download.py
-          uv run python src/generate.py
-          ./hugo.sh build
+          ./scripts/build.sh
 
       - name: Upload dist/ to GitHub Pages
         uses: actions/upload-pages-artifact@v3
