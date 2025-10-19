@@ -10,7 +10,11 @@ Pages**.
 
 ---
 
-## 🪄 How the Website Updates
+<!-- This section is shown as 'help instructions' in the Excel spreadsheet. -->
+
+<!-- instructions-start -->
+
+## 🪄 How to update the website
 
 If you only manage the bakery menu and product details:
 
@@ -28,6 +32,8 @@ If you only manage the bakery menu and product details:
    - Wait for it to finish (typically a couple of minutes).
    - Once it completes, the updated website will be live at:
      👉 **https://orangeandoliveco.in**
+
+<!-- instructions-end -->
 
 ---
 
