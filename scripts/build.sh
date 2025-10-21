@@ -1,4 +1,6 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
+
+set -euo pipefail
 
 HERE=$(dirname "$0")
 cd "$HERE/.." || exit 1
