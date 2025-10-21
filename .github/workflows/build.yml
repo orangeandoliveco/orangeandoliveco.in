@@ -34,10 +34,12 @@ jobs:
 
       - name: Restore manifest cache
         id: cache-manifest
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: data/manifest.json
-          key: manifest-${{ runner.os }}
+          key: manifest
+          restore-keys: |
+            - manifest-
 
       - name: Build site
         id: build
@@ -55,7 +57,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: data/manifest.json
-          key: manifest-${{ runner.os }}
+          key: manifest-${{ hashFiles('data/manifest.json') }}
 
       - name: Upload public/ to GitHub Pages
         if: steps.build.outputs.changed == 'true'
