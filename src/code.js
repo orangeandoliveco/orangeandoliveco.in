@@ -27,10 +27,6 @@ const openDrive = () => {
 };
 
 const fetchReadme = () => {
-  const cache = CacheService.getScriptCache();
-  const cached = cache.get("readme_md");
-  if (cached) return cached;
-
   // Public raw URL (no auth required for public repo)
   const url =
     "https://raw.githubusercontent.com/orangeandoliveco/orangeandoliveco.in/main/README.md";
@@ -39,9 +35,7 @@ const fetchReadme = () => {
   if (code !== 200) {
     throw new Error("Failed to fetch README.md, HTTP " + code);
   }
-  const md = res.getContentText("UTF-8");
-  cache.put("readme_md", md, 600); // cache for 10 minutes
-  return md;
+  return res.getContentText("UTF-8");
 };
 
 /**
