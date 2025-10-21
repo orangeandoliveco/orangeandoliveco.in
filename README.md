@@ -16,18 +16,27 @@ Pages**.
 
 ## 🪄 How to update the website
 
-If you only manage the bakery menu and product details:
+The menu data is stored in a Google Sheet, and the images are stored in a
+Google Drive.
+
+To update the site, you can follow these steps:
 
 1. **Open the Google Sheet**
-   Update item names, descriptions, categories, prices, or images as needed.
-   - Make sure the `show` column is set to “Yes” for items that should appear on the website.
-   - Each item’s image must have a valid **Google Drive file ID**.
+
+   - Update item names, descriptions, categories, prices, or images as needed.
+   - Make sure the `show` column is set to "y" for items that should appear on
+     the website.
+   - Each item must also have an "image" name filled in, for it to appear on
+     the website.
 
 2. **Save your changes**
-   No need to export or upload anything manually.
+
+   No need to export or upload anything manually. The site will be updated
+   automatically in about two hours. If you need a faster update, you can
+   manually trigger a build.
 
 3. **Trigger a site update**
-   - Go to the **GitHub Actions** tab of this repository.
+   - Go to the [**GitHub Actions** tab](https://github.com/orangeandoliveco/orangeandoliveco.in/actions/workflows/build.yml) of this repository.
    - Select **“Deploy to GitHub Pages”** → **Run workflow**.
    - Wait for it to finish (typically a couple of minutes).
    - Once it completes, the updated website will be live at:
