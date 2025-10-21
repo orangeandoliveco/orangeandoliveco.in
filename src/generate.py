@@ -11,7 +11,7 @@ from constants import (
     MENU_CSV,
     CONTENT_DIR,
     CATEGORIES,
-    DATA_RAW_IMAGES_DIR,
+    DATA_WEB_IMAGES_DIR,
 )
 from utils import slugify
 
@@ -64,7 +64,7 @@ class MenuItem(BaseModel):
 
 def create_item_markdown(item: MenuItem, output_dir: Path, images_dir: Path) -> None:
     slug = slugify(item.name)
-    image = f"{slug}.jpg"
+    image = item.image = f"{slug}.jpg"
     item_dir = output_dir / slug
     item_dir.mkdir(parents=True, exist_ok=True)
 
@@ -124,7 +124,7 @@ def generate_site_content(
 
 
 if __name__ == "__main__":
-    errors = generate_site_content(MENU_CSV, CONTENT_DIR, DATA_RAW_IMAGES_DIR)
+    errors = generate_site_content(MENU_CSV, CONTENT_DIR, DATA_WEB_IMAGES_DIR)
     if errors:
         print("Site generation completed with errors.")
         sys.exit(1)
