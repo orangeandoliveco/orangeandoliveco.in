@@ -8,7 +8,7 @@ MENU_CSV = DATA_DIR / "menu.csv"
 CONTENT_DIR = ROOT / "content"
 TEMPLATE_DIR = ROOT / "templates"
 ASSETS_DIR = ROOT / "assets"
-MANIFEST_PATH = ROOT / "manifest.json"
+MANIFEST_PATH = DATA_DIR / "manifest.json"
 
 CATEGORIES = [
     "Cookies & Shortbreads",

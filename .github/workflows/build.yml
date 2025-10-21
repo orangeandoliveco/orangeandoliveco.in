@@ -34,8 +34,8 @@ jobs:
         id: cache-manifest
         uses: actions/cache@v4
         with:
-          path: manifest.json
-          key: manifest.json
+          path: data/manifest.json
+          key: data/manifest.json
 
       - name: Build site
         env:
@@ -50,8 +50,8 @@ jobs:
       - name: Save manifest cache
         uses: actions/cache/save@v4
         with:
-          path: manifest.json
-          key: manifest.json
+          path: data/manifest.json
+          key: data/manifest.json
 
       - name: Upload dist/ to GitHub Pages
         uses: actions/upload-pages-artifact@v3

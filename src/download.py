@@ -67,7 +67,6 @@ def _sha256_bytes(b: bytes) -> str:
 
 
 def _load_manifest() -> dict:
-    MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
     if MANIFEST_PATH.exists():
         try:
             return json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
@@ -77,6 +76,7 @@ def _load_manifest() -> dict:
 
 
 def _save_manifest(m: dict) -> None:
+    MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
     MANIFEST_PATH.write_text(
         json.dumps(m, indent=2, ensure_ascii=False), encoding="utf-8"
     )
