@@ -33,7 +33,11 @@ jobs:
       - name: Build site
         env:
           SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+          GOOGLE_DRIVE_ID: ${{ secrets.GOOGLE_DRIVE_ID }}
+          GCP_SA_KEY_JSON: ${{ secrets.GCP_SA_KEY_JSON }}
+          GOOGLE_APPLICATION_CREDENTIALS: "gcp-sa-key.json"
         run: |
+          echo "$GCP_SA_KEY_JSON" > $GOOGLE_APPLICATION_CREDENTIALS
           ./scripts/build.sh
 
       - name: Upload dist/ to GitHub Pages
