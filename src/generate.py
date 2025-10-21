@@ -11,7 +11,7 @@ from constants import (
     MENU_CSV,
     CONTENT_DIR,
     CATEGORIES,
-    DATA_IMAGES_DIR,
+    DATA_RAW_IMAGES_DIR,
 )
 from utils import slugify
 
@@ -50,7 +50,7 @@ class MenuItem(BaseModel):
     @field_validator("image")
     @classmethod
     def validate_image(cls, v: str) -> str:
-        if not v.lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
+        if not v.lower().endswith((".jpg", ".jpeg", ".png", ".webp", ".heif")):
             raise ValueError(f"Unsupported image format: {v}")
         return v
 
@@ -64,11 +64,12 @@ class MenuItem(BaseModel):
 
 def create_item_markdown(item: MenuItem, output_dir: Path, images_dir: Path) -> None:
     slug = slugify(item.name)
+    image = f"{slug}.jpg"
     item_dir = output_dir / slug
     item_dir.mkdir(parents=True, exist_ok=True)
 
-    src_image_path = images_dir / item.image
-    dst_image_path = item_dir / item.image
+    src_image_path = images_dir / image
+    dst_image_path = item_dir / image
     if src_image_path.exists():
         shutil.copy(src_image_path, dst_image_path)
     else:
@@ -123,7 +124,7 @@ def generate_site_content(
 
 
 if __name__ == "__main__":
-    errors = generate_site_content(MENU_CSV, CONTENT_DIR, DATA_IMAGES_DIR)
+    errors = generate_site_content(MENU_CSV, CONTENT_DIR, DATA_RAW_IMAGES_DIR)
     if errors:
         print("Site generation completed with errors.")
         sys.exit(1)
