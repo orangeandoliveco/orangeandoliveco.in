@@ -50,7 +50,7 @@ class MenuItem(BaseModel):
     @field_validator("image")
     @classmethod
     def validate_image(cls, v: str) -> str:
-        if not v.lower().endswith((".jpg", ".jpeg", ".png", ".webp", ".heif")):
+        if not v.lower().endswith((".jpg", ".jpeg", ".png", ".webp", ".heic")):
             raise ValueError(f"Unsupported image format: {v}")
         return v
 

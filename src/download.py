@@ -253,6 +253,7 @@ def download_images_from_csv(
                 continue
 
             slug = slugify(name)
+            print(f"Processing image for {slug}...")
             # Keep the existing image name for raw storage
             raw_path = DATA_RAW_IMAGES_DIR / image_raw_name
 
