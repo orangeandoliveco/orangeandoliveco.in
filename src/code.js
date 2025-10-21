@@ -8,6 +8,24 @@ const showInstructions = () => {
   SpreadsheetApp.getUi().showSidebar(output);
 };
 
+const openDrive = () => {
+  const props = PropertiesService.getScriptProperties();
+  const folderId = props.getProperty("DRIVE_FOLDER_ID");
+  if (!folderId) {
+    SpreadsheetApp.getUi().alert("Drive folder ID not set.");
+    return;
+  }
+  const url = "https://drive.google.com/drive/folders/" + folderId;
+  SpreadsheetApp.getUi().showModalDialog(
+    HtmlService.createHtmlOutput(
+      `<p>Click <a href="${url}" target="_blank" onclick="google.script.host.close()">here</a> to open the Drive folder.</p>`,
+    )
+      .setWidth(300)
+      .setHeight(80),
+    "Open Drive Folder",
+  );
+};
+
 const fetchReadme = () => {
   const cache = CacheService.getScriptCache();
   const cached = cache.get("readme_md");
@@ -92,5 +110,8 @@ const getColumnNumbers = (sheet) => {
 
 const onOpen = () => {
   const ui = SpreadsheetApp.getUi();
-  ui.createMenu("Website").addItem("Help", "showInstructions").addToUi();
+  ui.createMenu("Website")
+    .addItem("Help", "showInstructions")
+    .addItem("Open Drive", "openDrive")
+    .addToUi();
 };
