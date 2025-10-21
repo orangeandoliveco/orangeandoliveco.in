@@ -35,9 +35,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: data/manifest.json
-          key: data/manifest.json
+          key: manifest-${{ runner.os }}
 
       - name: Build site
+        id: build
         env:
           SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
           GOOGLE_DRIVE_ID: ${{ secrets.GOOGLE_DRIVE_ID }}
@@ -48,15 +49,18 @@ jobs:
           ./scripts/build.sh
 
       - name: Save manifest cache
+        if: steps.build.outputs.changed == 'true'
         uses: actions/cache/save@v4
         with:
           path: data/manifest.json
-          key: data/manifest.json
+          key: manifest-${{ runner.os }}
 
-      - name: Upload dist/ to GitHub Pages
+      - name: Upload public/ to GitHub Pages
+        if: steps.build.outputs.changed == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: public
 
       - name: Deploy
+        if: steps.build.outputs.changed == 'true'
         uses: actions/deploy-pages@v4

@@ -72,7 +72,7 @@ def _load_manifest() -> dict:
             return json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
         except Exception:
             pass
-    return {"images": {}}
+    return {}
 
 
 def _save_manifest(m: dict) -> None:
@@ -132,7 +132,7 @@ def _drive_list_files(dir_id: str, credentials) -> list[dict[str, str]]:
             drive.files()
             .list(
                 q=query,
-                fields="nextPageToken, files(id, name, mimeType)",
+                fields="nextPageToken, files(id, name, mimeType, kind, md5Checksum)",
                 pageSize=1000,
                 pageToken=page_token,
             )
@@ -195,6 +195,17 @@ def _generate_web_images(raw_path: Path, base_stem: str) -> dict:
     return out
 
 
+def check_google_drive_changed(google_drive_id: str) -> bool:
+    creds = _credentials()
+    files = _drive_list_files(google_drive_id, credentials=creds)
+    manifest = sorted((f["id"], f.get("md5Checksum")) for f in files)
+    manifest_ = _load_manifest()
+    old_manifest = sorted(
+        (fid, finfo.get("md5Checksum")) for fid, finfo in manifest_.items()
+    )
+    return old_manifest != manifest
+
+
 def download_images_from_csv(
     csv_path: Path, google_drive_id: str, fix_images: bool = False
 ) -> list[str]:
@@ -226,14 +237,11 @@ def download_images_from_csv(
         web_files = {}
 
     _ensure_dirs()
-    manifest = _load_manifest()
-    m = manifest["images"]
-
     errors, new_rows = [], []
     manual_upload = False
+    manifest = _load_manifest()
     with csv_path.open("r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
-        headers = reader.fieldnames or []
         for row in reader:
             new_rows.append(row)
             name = (row.get("name") or "").strip()
@@ -252,73 +260,45 @@ def download_images_from_csv(
                 )
                 continue
 
+            curr_md5 = matching_files[0].get("md5Checksum") if matching_files else None
+            prev_md5 = manifest.get(file_id, {}).get("md5Checksum")
             slug = slugify(name)
+            jpg_path = DATA_WEB_IMAGES_DIR / f"{slug}.jpg"
+            webp_path = DATA_WEB_IMAGES_DIR / f"{slug}.webp"
+            if (
+                not fix_images
+                and curr_md5 == prev_md5
+                and (
+                    (EMIT_JPEG and jpg_path.exists())
+                    or (EMIT_WEBP and webp_path.exists())
+                )
+            ):
+                print(f"✅ Image for '{slug}' unchanged, skipping...")
+                continue
+
+            manual_upload = True
             print(f"Processing image for {slug}...")
             # Keep the existing image name for raw storage
             raw_path = DATA_RAW_IMAGES_DIR / image_raw_name
 
             try:
-                # Always refetch to detect changed bytes on same file_id
                 content = _drive_download_bytes(file_id, credentials)
-                raw_sha = _sha256_bytes(content)
+                _save_image(raw_path, content)
+                _generate_web_images(raw_path, slug)
                 raw_bytes = len(content)
-
                 if raw_bytes > RAW_MAX_BYTES:
                     errors.append(
                         f"⚠ Raw {image_raw_name} {raw_bytes/1024:.0f}KB > {RAW_MAX_BYTES/1024:.0f}KB"
                     )
 
-                prev = m.get(file_id, {})
-                raw_changed = prev.get("raw_sha") != raw_sha
-
-                if raw_changed or not raw_path.exists():
-                    _save_image(raw_path, content)
-
-                need_web = fix_images or raw_changed
-                jpeg_path = DATA_WEB_IMAGES_DIR / f"{slug}.jpg"
-                webp_path = DATA_WEB_IMAGES_DIR / f"{slug}.webp"
-
-                if webp_path.name in web_files:
-                    webp_file_id = web_files[webp_path.name]
-                    webp_content = _drive_download_bytes(webp_file_id, credentials)
-                    webp_path.write_bytes(webp_content)
-
-                if jpeg_path.name in web_files:
-                    jpeg_file_id = web_files[jpeg_path.name]
-                    jpeg_content = _drive_download_bytes(jpeg_file_id, credentials)
-                    jpeg_path.write_bytes(jpeg_content)
-
-                if not jpeg_path.exists() and not webp_path.exists():
-                    need_web = True
-                    manual_upload = True
-
-                if need_web:
-                    out = _generate_web_images(raw_path, slug)
-                else:
-                    out = {}
-                    if jpeg_path.exists():
-                        out["jpeg"] = jpeg_path.name
-                        out["jpeg_bytes"] = jpeg_path.stat().st_size
-                    if webp_path.exists():
-                        out["webp"] = webp_path.name
-                        out["webp_bytes"] = webp_path.stat().st_size
-
-                # Update manifest and CSV row
-                m[file_id] = {
-                    "name": name,
-                    "raw_name": image_raw_name,
-                    "raw_sha": raw_sha,
-                    "raw_bytes": raw_bytes,
-                    "slug": slug,
-                    **out,
-                    "updated_at": int(time.time()),
-                }
-
             except Exception as e:
                 errors.append(f"❌ file_id={file_id}: {e}")
                 raise e
 
+    # Update manifest
+    manifest = {f["id"]: f for f in files}
     _save_manifest(manifest)
+
     if manual_upload:
         url = f"https://drive.google.com/drive/folders/{web_dir_id}"
         errors.append(
@@ -347,6 +327,11 @@ def main():
         help="(Re)generate web images & write updated CSV",
     )
     args = ap.parse_args()
+
+    changed = check_google_drive_changed(gdid)
+    if not changed:
+        print("✅ No changes detected in Google Drive; skipping download.")
+        return
 
     # 1) Fetch sheet → CSV
     fetch_sheet_to_csv(ssid, args.sheet_tab, MENU_CSV)
