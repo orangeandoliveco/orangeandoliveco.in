@@ -4,7 +4,7 @@ name: Deploy to GitHub Pages
 on:
   workflow_dispatch:
   # schedule:
-  #   - cron: "0 */2 * * *" # every two hours
+  #   - cron: "0 * * * *" # every day
   # push:
   #   branches:
   #     - main
@@ -32,39 +32,21 @@ jobs:
       - name: Sync dependencies from uv.lock
         run: uv sync --locked
 
-      - name: Restore manifest cache
-        id: cache-manifest
-        uses: actions/cache/restore@v4
-        with:
-          path: data/manifest.json
-          key: manifest
-          restore-keys: |
-            - manifest-
+      - name: Install fonts
+        run: sudo apt-get install -y fonts-crosextra-caladea
+
+      - name: Install Playwright browsers
+        run: uv run playwright install --with-deps chromium
 
       - name: Build site
-        id: build
         env:
           SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
-          GOOGLE_DRIVE_ID: ${{ secrets.GOOGLE_DRIVE_ID }}
-          GCP_SA_KEY_JSON: ${{ secrets.GCP_SA_KEY_JSON }}
-          GOOGLE_APPLICATION_CREDENTIALS: "gcp-sa-key.json"
-        run: |
-          echo "$GCP_SA_KEY_JSON" > $GOOGLE_APPLICATION_CREDENTIALS
-          ./scripts/build.sh
-
-      - name: Save manifest cache
-        if: steps.build.outputs.changed == 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: data/manifest.json
-          key: manifest-${{ hashFiles('data/manifest.json') }}
+        run: ./scripts/build.sh
 
       - name: Upload public/ to GitHub Pages
-        if: steps.build.outputs.changed == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: public
 
       - name: Deploy
-        if: steps.build.outputs.changed == 'true'
         uses: actions/deploy-pages@v4

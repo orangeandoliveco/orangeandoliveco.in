@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Orange and Olive Co. — Menu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caladea:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Caladea', Cambria, Georgia, 'Times New Roman', serif;
+      font-size: 11pt;
+      color: #4f6228;
+      line-height: 1.5;
+    }
+
+    .category {
+      break-before: page;
+      page-break-before: always;
+    }
+
+    .category:first-child {
+      break-before: auto;
+      page-break-before: auto;
+    }
+
+    .category h2 {
+      font-size: 20pt;
+      font-weight: bold;
+      color: #f79646;
+      margin-bottom: 2mm;
+      break-after: avoid;
+      page-break-after: avoid;
+    }
+
+    .category hr {
+      border: none;
+      border-top: 1pt solid #4f6228;
+      margin-bottom: 10mm;
+    }
+
+    /* Each item: name → description → price (stacked) */
+    .item {
+      page-break-inside: avoid;
+      margin-bottom: 22mm;
+    }
+
+    .item-name {
+      display: block;
+      font-size: 14pt;
+      font-weight: bold;
+      color: #f79646;
+    }
+
+    .item-description {
+      font-size: 10pt;
+      color: #4f6228;
+      margin-top: 1.5mm;
+      line-height: 1.5;
+    }
+
+    /* Price block: right-aligned, below description */
+    .price-block {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+      gap: 8mm;
+      margin-top: 4mm;
+    }
+
+    .price-row {
+      text-align: right;
+    }
+
+    .price-amount {
+      display: block;
+      font-size: 11pt;
+      color: #4f6228;
+    }
+
+    .price-size {
+      display: block;
+      font-size: 8pt;
+      color: #4f6228;
+    }
+
+    /* Cover: full-page, title vertically centered */
+    .cover {
+      height: calc(297mm - 30mm - 20mm); /* A4 minus top/bottom margins */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .cover h1 {
+      font-size: 26pt;
+      font-weight: bold;
+      color: #f79646;
+      line-height: 1.2;
+      margin-bottom: 2mm;
+    }
+
+    .cover .subtitle {
+      font-size: 12pt;
+      color: #4f6228;
+      margin-bottom: 6mm;
+    }
+
+    .cover hr {
+      border: none;
+      border-top: 1pt solid #4f6228;
+      width: 40mm;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Title section: only on page 1 since it's body content, not the repeating header -->
+  <div class="cover">
+    <h1>Orange and Olive Co.</h1>
+    <p class="subtitle">Artisanal Cookies, Cakes &amp; More</p>
+    <hr>
+  </div>
+
+  {% for cat_name, items in categories %}
+  <div class="category">
+    <h2>{{ cat_name }}</h2>
+    <hr>
+
+    {% for item in items %}
+    <div class="item">
+      <span class="item-name">{{ item.name }}</span>
+
+      {% if item.description %}
+      <p class="item-description">{{ item.description }}</p>
+      {% endif %}
+
+      <div class="price-block">
+        {% for pair in item.price_sizes() %}
+        <div class="price-row">
+          <span class="price-amount">Rs {{ pair.price }}</span>
+          <span class="price-size">({{ pair.size }})</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+
+</body>
+</html>
