@@ -8,3 +8,4 @@ __pycache__
 /content/
 /.clasp.json
 /gcp-sa-key.json
+/static/menu.pdf
