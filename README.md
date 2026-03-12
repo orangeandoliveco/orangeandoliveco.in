@@ -3,10 +3,13 @@
 This repository powers the **Orange and Olive Co.** website from a Google
 Sheet.
 
-The site content (menu, images, and descriptions) is pulled directly from a
-Google Sheet and Google Drive, converted into structured Markdown pages, and
-published automatically to **https://orangeandoliveco.in** via **GitHub
-Pages**.
+The menu data is pulled from a publicly-accessible Google Sheet, a PDF menu
+is generated from it, and the site is published to
+**https://orangeandoliveco.in** via **GitHub Pages**.
+
+> **Note on images:** Individual item images are not currently shown on the
+> site. The architecture is designed to support them in future — the CSV has
+> columns for images, and the Hugo templates are in place.
 
 ---
 
@@ -16,30 +19,23 @@ Pages**.
 
 ## 🪄 How to update the website
 
-The menu data is stored in a Google Sheet, and the images are stored in a
-Google Drive.
-
-To update the site, you can follow these steps:
+The menu data is stored in a Google Sheet. To update the site:
 
 1. **Open the Google Sheet**
 
-   - Update item names, descriptions, categories, prices, or images as needed.
-   - Make sure the `show` column is set to "y" for items that should appear on
-     the website.
-   - Each item must also have an "image" name filled in, for it to appear on
-     the website.
+   - Update item names, descriptions, categories, prices, or sizes as needed.
+   - Use `price_1` / `size_1` for the primary price, and `price_2` / `size_2`
+     (etc.) for additional sizes.
+   - Set the `show` column to `y` for items that should appear in the menu.
 
-2. **Save your changes**
+2. **Trigger a site update**
 
-   No need to export or upload anything manually. The site will be updated
-   automatically in about two hours. If you need a faster update, you can
-   manually trigger a build.
-
-3. **Trigger a site update**
-   - Go to the [**GitHub Actions** tab](https://github.com/orangeandoliveco/orangeandoliveco.in/actions/workflows/build.yml) of this repository.
-   - Select **“Deploy to GitHub Pages”** → **Run workflow**.
-   - Wait for it to finish (typically a couple of minutes).
-   - Once it completes, the updated website will be live at:
+   The site rebuilds automatically on code change. To trigger it
+   manually (e.g. after updating only the sheet):
+   - Go to the [**GitHub Actions** tab](https://github.com/orangeandoliveco/orangeandoliveco.in/actions/workflows/build.yml).
+   - Select **"Update menu on website"** → **Run workflow**.
+   - Wait for it to finish (typically 2–3 minutes).
+   - The updated site and PDF menu will be live at:
      👉 **https://orangeandoliveco.in**
 
 <!-- instructions-end -->
@@ -48,38 +44,72 @@ To update the site, you can follow these steps:
 
 ## 🧩 Local Build (for developers)
 
-If you want to build or test the site locally:
+### Prerequisites
 
-1. **Install dependencies**
-   ```bash
-   uv sync --locked
-   ```
+```bash
+uv sync --locked
+uv run playwright install --with-deps chromium
+sudo apt-get install -y fonts-crosextra-caladea  # Cambria-compatible font
+```
 
-2. **Set environment variable**
+### Build steps
+
+1. **Set the spreadsheet ID**
    ```bash
    export SPREADSHEET_ID="your-google-sheet-id"
    ```
 
-3. **Run the build**
+2. **Run the full build**
    ```bash
    ./scripts/build.sh
    ```
 
-This script:
-1. Downloads the latest sheet (`src/download.py`)
-2. Generates site content (`src/generate.py`)
-3. Runs Hugo (`./hugo.sh build`) to build into `public/`
+   This runs three steps:
+   1. `src/download.py` — fetches `data/menu.csv` from the public Google Sheet
+   2. `src/generate_pdf.py` — renders `static/menu.pdf` via Playwright (HTML → PDF)
+   3. `./hugo.sh build` — builds the site into `public/`
+
+### Debugging the PDF
+
+To inspect or tweak the PDF layout in a browser:
+
+```bash
+# Save the rendered HTML (logo embedded as base64, so it opens standalone)
+uv run python src/generate_pdf.py --save-html /tmp/menu_debug.html
+
+# Open in Chrome, then: DevTools → Rendering → Emulate CSS media type → print
+```
+
+To generate a test PDF without overwriting `static/menu.pdf`:
+
+```bash
+uv run python src/generate_pdf.py --output /tmp/menu_test.pdf
+```
+
+To skip validation errors (useful when iterating on new CSV columns):
+
+```bash
+uv run python src/generate_pdf.py --ignore-errors --output /tmp/menu_test.pdf
+```
 
 ---
 
-## 🧠 Validation & Notes
+## 🧠 CSV Format
 
-- The CSV must contain columns like:
-  `name`, `category`, `description`, `price`, `weight_unit`, `image`, `file_id`, `show`
-- Only rows with `show = Yes` are included.
-- Categories must match those defined in `src/constants.py`.
-- Images larger than **1 MB** will trigger an error (to keep load times fast).
-- Validation errors in the CSV will appear in the workflow logs and stop deployment.
+The sheet must have a `menu` tab with these columns:
+
+| Column | Required | Notes |
+|--------|----------|-------|
+| `name` | ✓ | Item name |
+| `category` | ✓ | Must match one of the categories in `src/constants.py` |
+| `description` | | Free text |
+| `price_1` | ✓ | Primary price (numeric) |
+| `size_1` | ✓ | Primary size/unit (e.g. `1 kg`, `6 cookies`) |
+| `price_2`, `size_2` | | Optional second size |
+| `price_3`, `size_3` | | Optional third size |
+| `show` | ✓ | Set to `y` to include in the menu |
+
+Validation errors appear in workflow logs and stop deployment.
 
 ---
 
