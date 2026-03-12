@@ -3,11 +3,11 @@ name: Update menu on website
 
 on:
   workflow_dispatch:
-  # schedule:
-  #   - cron: "0 * * * *" # every day
-  # push:
-  #   branches:
-  #     - main
+  schedule:
+    - cron: "0 */6 * * *" # every day
+  push:
+    branches:
+      - main
 
 jobs:
   build-and-deploy:
