@@ -104,7 +104,7 @@ const getColumnNumbers = (sheet) => {
 
 const onOpen = () => {
   const ui = SpreadsheetApp.getUi();
-  ui.createMenu("Website")
+  ui.createMenu("OnO Website")
     .addItem("Help", "showInstructions")
     .addItem("Open Drive", "openDrive")
     .addToUi();
