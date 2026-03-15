@@ -88,6 +88,7 @@
 
     /* Cover: full-page, title vertically centered */
     .cover {
+      position: relative;
       height: calc(297mm - 30mm - 20mm); /* A4 minus top/bottom margins */
       display: flex;
       flex-direction: column;
@@ -122,6 +123,14 @@
       color: #4f6228;
       margin-top: 6mm;
       line-height: 1.8;
+    }
+
+    .cover .generated {
+      position: absolute;
+      bottom: 0;
+      font-size: 7.5pt;
+      color: #4f6228;
+      opacity: 0.35;
     }
 
     .cover .contact a {
@@ -164,6 +173,7 @@
         </a>
       </div>
     </div>
+    <span class="generated">{{ generated }}</span>
   </div>
 
   {% for cat_name, items in categories %}

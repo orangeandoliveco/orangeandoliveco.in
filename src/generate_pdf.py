@@ -11,6 +11,7 @@ import base64
 import csv
 import sys
 from collections import defaultdict
+from datetime import date
 from pathlib import Path
 from typing import Optional
 
@@ -120,7 +121,8 @@ def render_html(items: list[MenuItem]) -> str:
     env = Environment(loader=FileSystemLoader(str(TEMPLATE_DIR)), autoescape=True)
     template = env.get_template("menu-pdf.html")
     categories = group_by_category(items)
-    return template.render(categories=categories)
+    generated = date.today().strftime("%-d %B %Y")
+    return template.render(categories=categories, generated=generated)
 
 
 def generate_pdf(html: str, output: Path, logo_uri: str) -> None:
