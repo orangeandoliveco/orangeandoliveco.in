@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice — Orange and Olive Co.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'EB Garamond', Garamond, Georgia, serif;
+      font-size: 12pt;
+      color: #4f6228;
+      background: #fff;
+      padding: 18mm 22mm;
+    }
+
+    /* ── Header ── */
+    .inv-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 6mm;
+    }
+    .inv-logo { width: 70px; height: auto; }
+    .inv-bakery { text-align: right; }
+    .inv-bakery-name {
+      font-size: 20pt;
+      font-weight: 600;
+      color: #f79646;
+      line-height: 1.1;
+    }
+    .inv-bakery-tagline { font-size: 10pt; color: #4f6228; margin-top: 1mm; }
+
+    /* ── Title bar ── */
+    .inv-title-bar {
+      border-top: 1.5pt solid #f79646;
+      border-bottom: 1.5pt solid #f79646;
+      padding: 2.5mm 0;
+      margin-bottom: 7mm;
+      text-align: center;
+    }
+    .inv-title {
+      font-size: 15pt;
+      font-weight: 600;
+      color: #f79646;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+    }
+
+    /* ── Meta (bill to + date) ── */
+    .inv-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 7mm;
+      gap: 10mm;
+    }
+    .inv-meta-label {
+      display: block;
+      font-size: 8pt;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #4f6228;
+      opacity: 0.65;
+      margin-bottom: 1.5mm;
+    }
+    .inv-bill-to { flex: 1; }
+    .inv-date-block { text-align: right; white-space: nowrap; }
+
+    /* ── Editable text fields ── */
+    .inv-field {
+      display: block;
+      font: inherit;
+      color: inherit;
+      border: none;
+      border-bottom: 0.5pt solid #c8d4b0;
+      background: transparent;
+      outline: none;
+      padding: 1mm 0;
+    }
+    .inv-field:focus { border-bottom-color: #f79646; }
+    .inv-bill-to .inv-field { width: 100%; }
+    .inv-date-block .inv-field { text-align: right; }
+
+    /* ── Items table ── */
+    .inv-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 3mm;
+    }
+    .inv-table th {
+      font-size: 8pt;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #4f6228;
+      border-bottom: 1pt solid #4f6228;
+      padding: 0 2mm 2mm 0;
+      text-align: left;
+    }
+    .inv-table th.r, .inv-table td.r { text-align: right; padding-right: 0; }
+    .inv-table td {
+      padding: 2.5mm 2mm 2.5mm 0;
+      vertical-align: middle;
+      border-bottom: 0.25pt solid #dde8c4;
+    }
+    .inv-table select,
+    .inv-table input[type="number"] {
+      font: inherit;
+      color: inherit;
+      border: none;
+      border-bottom: 0.5pt solid #c8d4b0;
+      background: transparent;
+      outline: none;
+    }
+    .inv-table select { width: 100%; }
+    .inv-table select:focus,
+    .inv-table input:focus { border-bottom-color: #f79646; }
+    .inv-table input[type="number"] { width: 58px; text-align: right; }
+    .col-item  { width: 32%; }
+    .col-size  { width: 22%; }
+    .col-qty   { width: 8%; }
+    .col-price { width: 15%; }
+    .col-total { width: 15%; }
+    .col-act   { width: 5%; text-align: center; }
+
+    /* ── Additional charges ── */
+    .inv-charges {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2mm;
+      margin: 1mm 0 4mm;
+    }
+    .inv-charge-row {
+      display: flex;
+      align-items: center;
+      gap: 5mm;
+    }
+    .inv-charge-label {
+      font-size: 10pt;
+      color: #4f6228;
+      text-align: right;
+      min-width: 28mm;
+    }
+    .inv-charge-amount {
+      font: inherit;
+      font-size: 10pt;
+      color: inherit;
+      border: none;
+      border-bottom: 0.5pt solid #c8d4b0;
+      background: transparent;
+      outline: none;
+      width: 72px;
+      text-align: right;
+    }
+    .inv-charge-amount:focus { border-bottom-color: #f79646; }
+
+    /* ── Grand total ── */
+    .inv-total-row {
+      display: flex;
+      justify-content: flex-end;
+      align-items: baseline;
+      gap: 5mm;
+      border-top: 1pt solid #4f6228;
+      padding-top: 3mm;
+      margin-bottom: 10mm;
+    }
+    .inv-total-label { font-size: 12pt; font-weight: 600; color: #f79646; }
+    .inv-total-amount {
+      font-size: 14pt;
+      font-weight: 700;
+      color: #f79646;
+      min-width: 72px;
+      text-align: right;
+    }
+
+    /* ── Payment ── */
+    .inv-payment {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 4mm;
+      margin-bottom: 8mm;
+    }
+    .inv-payment-label {
+      text-align: right;
+      font-size: 8.5pt;
+      color: #4f6228;
+      line-height: 1.6;
+    }
+    .inv-payment-label strong { display: block; font-size: 9pt; }
+    #upi-qr img, #upi-qr canvas { width: 22mm !important; height: 22mm !important; display: block; }
+
+    /* ── Footer ── */
+    .inv-footer {
+      border-top: 0.5pt solid #4f6228;
+      padding-top: 3mm;
+      font-size: 8.5pt;
+      color: #4f6228;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 5mm;
+    }
+    .inv-footer-contact {
+      display: flex;
+      gap: 6mm;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .inv-footer-contact a {
+      color: #4f6228;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 1.5mm;
+    }
+    .inv-footer-contact svg { width: 11pt; height: 11pt; flex-shrink: 0; }
+
+    /* ── Screen-only controls ── */
+    .controls {
+      margin-top: 7mm;
+      display: flex;
+      gap: 3mm;
+    }
+    .btn {
+      font: inherit;
+      font-size: 10pt;
+      color: #fff;
+      background: #4f6228;
+      border: none;
+      border-radius: 4px;
+      padding: 2mm 6mm;
+      cursor: pointer;
+    }
+    .btn:hover { background: #3c4d1e; }
+    .btn-sm {
+      font: inherit;
+      font-size: 10pt;
+      color: #4f6228;
+      background: transparent;
+      border: 1px solid #c8d4b0;
+      border-radius: 4px;
+      padding: 2mm 6mm;
+      cursor: pointer;
+    }
+    .btn-sm:hover { border-color: #4f6228; }
+    .btn-del {
+      font: inherit;
+      font-size: 11pt;
+      color: #bbb;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0 1mm;
+    }
+    .btn-del:hover { color: #c00; }
+
+    /* ── Screen / print visibility ── */
+    .print-only { display: none; }
+
+    /* ── Print ── */
+    @media print {
+      body { padding: 15mm 20mm; }
+      .no-print    { display: none !important; }
+      .screen-only { display: none !important; }
+      .print-only  { display: inline !important; }
+      .inv-field   { border-bottom: none; }
+      .inv-table input[type="number"] { border-bottom: none; -webkit-appearance: none; }
+      .inv-charge-amount { border-bottom: none; }
+      .inv-charge-row.zero { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<script>
+  const MENU = {{ menu_json }};
+  let rowCount = 0;
+  const activeRows = new Set();
+
+  function fmt(n) {
+    return 'Rs\u00a0' + Number(n).toLocaleString('en-IN');
+  }
+
+  function addRow() {
+    const tbody = document.getElementById('items-body');
+    const id = ++rowCount;
+    activeRows.add(id);
+
+    const productOptions = MENU.map((m, i) =>
+      `<option value="${i}">${m.name}</option>`
+    ).join('');
+
+    const tr = document.createElement('tr');
+    tr.id = `row-${id}`;
+    tr.innerHTML = `
+      <td class="col-item">
+        <select class="screen-only" id="product-${id}" onchange="onProductChange(${id})">
+          <option value="">&#8212; select &#8212;</option>
+          ${productOptions}
+        </select>
+        <span class="print-only" id="product-print-${id}"></span>
+      </td>
+      <td class="col-size">
+        <select class="screen-only" id="size-${id}" onchange="onSizeChange(${id})">
+          <option value="">&#8212;</option>
+        </select>
+        <span class="print-only" id="size-print-${id}"></span>
+      </td>
+      <td class="col-qty r">
+        <input type="number" id="qty-${id}" value="1" min="1" oninput="recalcRow(${id})">
+      </td>
+      <td class="col-price r">
+        <input type="number" id="price-${id}" value="0" min="0" oninput="recalcRow(${id})">
+      </td>
+      <td class="col-total r" id="total-${id}">Rs&nbsp;0</td>
+      <td class="col-act no-print">
+        <button class="btn-del" onclick="removeRow(${id})" title="Remove">&#x2715;</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  function removeRow(id) {
+    document.getElementById(`row-${id}`)?.remove();
+    activeRows.delete(id);
+    recalcGrand();
+  }
+
+  function onProductChange(id) {
+    const productSel   = document.getElementById(`product-${id}`);
+    const sizeSel      = document.getElementById(`size-${id}`);
+    const priceInput   = document.getElementById(`price-${id}`);
+    const productPrint = document.getElementById(`product-print-${id}`);
+    const sizePrint    = document.getElementById(`size-print-${id}`);
+
+    sizeSel.innerHTML = '<option value="">&#8212;</option>';
+    sizePrint.textContent = '';
+    priceInput.value = 0;
+
+    const idx = productSel.value;
+    if (idx === '') { productPrint.textContent = ''; recalcRow(id); return; }
+
+    const item = MENU[parseInt(idx)];
+    productPrint.textContent = item.name;
+    item.sizes.forEach((s, i) => sizeSel.appendChild(new Option(s.size, i)));
+
+    if (item.sizes.length === 1) {
+      sizeSel.value = 0;
+      sizePrint.textContent = item.sizes[0].size;
+      priceInput.value = item.sizes[0].price;
+    }
+    recalcRow(id);
+  }
+
+  function onSizeChange(id) {
+    const productSel = document.getElementById(`product-${id}`);
+    const sizeSel    = document.getElementById(`size-${id}`);
+    const priceInput = document.getElementById(`price-${id}`);
+    const sizePrint  = document.getElementById(`size-print-${id}`);
+
+    const idx     = productSel.value;
+    const sizeIdx = sizeSel.value;
+    if (idx !== '' && sizeIdx !== '') {
+      const s = MENU[parseInt(idx)].sizes[parseInt(sizeIdx)];
+      priceInput.value = s.price;
+      sizePrint.textContent = s.size;
+    } else {
+      sizePrint.textContent = '';
+    }
+    recalcRow(id);
+  }
+
+  function recalcRow(id) {
+    const qty   = parseFloat(document.getElementById(`qty-${id}`)?.value)   || 0;
+    const price = parseFloat(document.getElementById(`price-${id}`)?.value) || 0;
+    document.getElementById(`total-${id}`).textContent = fmt(qty * price);
+    recalcGrand();
+  }
+
+  function recalcGrand() {
+    let sum = 0;
+    activeRows.forEach(id => {
+      const qty   = parseFloat(document.getElementById(`qty-${id}`)?.value)   || 0;
+      const price = parseFloat(document.getElementById(`price-${id}`)?.value) || 0;
+      sum += qty * price;
+    });
+
+    const packagingEl = document.getElementById('packaging-cost');
+    const deliveryEl  = document.getElementById('delivery-cost');
+    const packaging = parseFloat(packagingEl?.value) || 0;
+    const delivery  = parseFloat(deliveryEl?.value)  || 0;
+
+    packagingEl.closest('.inv-charge-row').classList.toggle('zero', packaging === 0);
+    deliveryEl.closest('.inv-charge-row').classList.toggle('zero', delivery === 0);
+
+    sum += packaging + delivery;
+    document.getElementById('grand-total').textContent = fmt(sum);
+  }
+
+  function updateTitle() {
+    const slug = s => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const name = document.getElementById('customer-name').value.trim();
+    const date = document.getElementById('invoice-date').value;
+    const parts = ['invoice-ooc'];
+    if (name) parts.push(slug(name));
+    if (date) parts.push(date);
+    document.title = parts.join('-');
+  }
+
+  function updateDatePrint() {
+    const val = document.getElementById('invoice-date').value;
+    const span = document.getElementById('date-print');
+    if (val) {
+      const d = new Date(val + 'T00:00:00');
+      span.textContent = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+    } else {
+      span.textContent = '';
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const dateEl = document.getElementById('invoice-date');
+    dateEl.value = new Date().toLocaleDateString('en-CA');
+    dateEl.addEventListener('change', () => { updateDatePrint(); updateTitle(); });
+    updateDatePrint();
+    updateTitle();
+
+    const nameEl = document.getElementById('customer-name');
+    const namePrint = document.getElementById('customer-name-print');
+    nameEl.addEventListener('input', () => { namePrint.textContent = nameEl.value; updateTitle(); });
+
+    const phoneEl = document.getElementById('customer-phone');
+    const phonePrint = document.getElementById('customer-phone-print');
+    const syncPhone = () => {
+      phonePrint.textContent = phoneEl.value;
+      phonePrint.style.display = phoneEl.value.trim() ? 'block' : 'none';
+    };
+    phoneEl.addEventListener('input', syncPhone);
+    syncPhone();
+
+    new QRCode(document.getElementById('upi-qr'), {
+      text: 'upi://pay?pa=msorangeandoliveco.eazypay@icici&pn=Orange%20and%20Olive%20Co.',
+      width: 83, height: 83,
+      colorDark: '#000000', colorLight: '#ffffff',
+    });
+
+    addRow();
+    recalcGrand();
+  });
+</script>
+
+<div id="invoice">
+
+  <!-- Header: logo left, bakery name right -->
+  <div class="inv-header">
+    <img src="{{ logo_uri }}" class="inv-logo" alt="Orange and Olive Co.">
+    <div class="inv-bakery">
+      <div class="inv-bakery-name">Orange and Olive Co.</div>
+      <div class="inv-bakery-tagline">Artisanal Cookies, Cakes &amp; More</div>
+    </div>
+  </div>
+
+  <div class="inv-title-bar"><span class="inv-title">Invoice</span></div>
+
+  <!-- Bill To + Date -->
+  <div class="inv-meta">
+    <div class="inv-bill-to">
+      <span class="inv-meta-label">Bill To</span>
+      <input class="inv-field screen-only" id="customer-name" type="text" placeholder="Customer name">
+      <span class="print-only" id="customer-name-print" style="font-size:12pt;"></span>
+      <input class="inv-field screen-only" id="customer-phone" type="text" placeholder="Phone (optional)"
+             style="margin-top:1.5mm; font-size:10pt; opacity:0.8;">
+      <span class="print-only" id="customer-phone-print" style="font-size:10pt; opacity:0.8; margin-top:1.5mm; display:block;"></span>
+    </div>
+    <div class="inv-date-block">
+      <span class="inv-meta-label">Date</span>
+      <input class="inv-field screen-only" id="invoice-date" type="date">
+      <span class="print-only" id="date-print"></span>
+    </div>
+  </div>
+
+  <!-- Items table -->
+  <table class="inv-table">
+    <thead>
+      <tr>
+        <th class="col-item">Item</th>
+        <th class="col-size">Size / Variant</th>
+        <th class="col-qty r">Qty</th>
+        <th class="col-price r">Unit Price</th>
+        <th class="col-total r">Total</th>
+        <th class="col-act no-print"></th>
+      </tr>
+    </thead>
+    <tbody id="items-body"></tbody>
+  </table>
+
+  <div style="display:flex; align-items:flex-end; min-height:52mm;">
+    <div class="no-print" style="padding-bottom: 3mm;">
+      <button class="btn-sm" onclick="addRow()">+ Add item</button>
+    </div>
+  </div>
+
+  <!-- Additional charges -->
+  <div class="inv-charges">
+    <div class="inv-charge-row">
+      <span class="inv-charge-label">Packaging</span>
+      <input class="inv-charge-amount" type="number" id="packaging-cost"
+             placeholder="0" min="0" oninput="recalcGrand()">
+    </div>
+    <div class="inv-charge-row">
+      <span class="inv-charge-label">Delivery</span>
+      <input class="inv-charge-amount" type="number" id="delivery-cost"
+             placeholder="0" min="0" oninput="recalcGrand()">
+    </div>
+  </div>
+
+  <!-- Grand total -->
+  <div class="inv-total-row">
+    <span class="inv-total-label">Total</span>
+    <span class="inv-total-amount" id="grand-total">Rs&nbsp;0</span>
+  </div>
+
+  <!-- Payment -->
+  <div class="inv-payment">
+    <div class="inv-payment-label">
+      <strong>Pay via UPI</strong>
+      msorangeandoliveco.eazypay@icici
+    </div>
+    <div id="upi-qr"></div>
+  </div>
+
+  <!-- Footer -->
+  <div class="inv-footer">
+    <div>* All prices are inclusive of GST.</div>
+    <div class="inv-footer-contact">
+      <a href="https://www.instagram.com/orangeandoliveco">
+        <svg viewBox="0 0 24 24" fill="#E1306C" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+        </svg>
+        @orangeandoliveco
+      </a>
+      <a href="https://wa.me/919220258883">
+        <svg viewBox="0 0 24 24" fill="#25D366" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
+        +91 92202 58883
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<!-- Screen-only controls -->
+<div class="controls no-print">
+  <button class="btn" onclick="window.print()">Print / Save PDF</button>
+</div>
+
+</body>
+</html>
