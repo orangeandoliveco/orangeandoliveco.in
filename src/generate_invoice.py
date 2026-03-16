@@ -15,6 +15,7 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 
+from config import INSTAGRAM_HANDLE, INSTAGRAM_URL, UPI_ID, WHATSAPP_NUMBER, WHATSAPP_URL
 from constants import MENU_CSV, TEMPLATE_DIR
 from generate_pdf import load_items, logo_data_uri
 
@@ -47,7 +48,15 @@ def main():
 
     env = Environment(loader=FileSystemLoader(str(TEMPLATE_DIR)), autoescape=False)
     tmpl = env.get_template("invoice.html")
-    html = tmpl.render(menu_json=json.dumps(menu_data, ensure_ascii=False), logo_uri=logo_uri)
+    html = tmpl.render(
+        menu_json=json.dumps(menu_data, ensure_ascii=False),
+        logo_uri=logo_uri,
+        instagram_url=INSTAGRAM_URL,
+        instagram_handle=INSTAGRAM_HANDLE,
+        whatsapp_url=WHATSAPP_URL,
+        whatsapp_number=WHATSAPP_NUMBER,
+        upi_id=UPI_ID,
+    )
 
     out = Path(args.output)
     out.write_text(html, encoding="utf-8")

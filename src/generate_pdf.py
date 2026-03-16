@@ -19,6 +19,7 @@ from jinja2 import Environment, FileSystemLoader
 from playwright.sync_api import sync_playwright
 from pydantic import BaseModel, Field, ValidationError, field_validator
 
+from config import INSTAGRAM_HANDLE, INSTAGRAM_URL, WHATSAPP_NUMBER, WHATSAPP_URL
 from constants import CATEGORIES, MENU_CSV, TEMPLATE_DIR
 
 ROOT = Path(__file__).parent.parent.absolute()
@@ -122,7 +123,14 @@ def render_html(items: list[MenuItem]) -> str:
     template = env.get_template("menu-pdf.html")
     categories = group_by_category(items)
     generated = date.today().strftime("%-d %B %Y")
-    return template.render(categories=categories, generated=generated)
+    return template.render(
+        categories=categories,
+        generated=generated,
+        instagram_url=INSTAGRAM_URL,
+        instagram_handle=INSTAGRAM_HANDLE,
+        whatsapp_url=WHATSAPP_URL,
+        whatsapp_number=WHATSAPP_NUMBER,
+    )
 
 
 def generate_pdf(html: str, output: Path, logo_uri: str) -> None:
