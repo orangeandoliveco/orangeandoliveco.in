@@ -386,12 +386,19 @@
       </td>
     `;
     tbody.appendChild(tr);
+    updateSpacer();
+  }
+
+  function updateSpacer() {
+    const extra = Math.max(0, (3 - activeRows.size) * 15);
+    document.getElementById('items-spacer').style.minHeight = extra + 'mm';
   }
 
   function removeRow(id) {
     document.getElementById(`row-${id}`)?.remove();
     activeRows.delete(id);
     delete rowOriginalPrices[id];
+    updateSpacer();
     recalcGrand();
   }
 
@@ -599,7 +606,7 @@
     <tbody id="items-body"></tbody>
   </table>
 
-  <div style="display:flex; align-items:flex-end; min-height:52mm;">
+  <div id="items-spacer" style="display:flex; align-items:flex-end;">
     <div class="no-print" style="padding-bottom: 3mm;">
       <button class="btn-sm" onclick="addRow()">+ Add item</button>
     </div>
