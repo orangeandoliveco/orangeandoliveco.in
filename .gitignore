@@ -9,3 +9,4 @@ __pycache__
 /.clasp.json
 /gcp-sa-key.json
 /static/menu.pdf
+/static/invoice.html
