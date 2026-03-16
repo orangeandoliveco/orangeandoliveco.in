@@ -349,7 +349,7 @@
 
     const productOptions = MENU.map((m, i) =>
       `<option value="${i}">${m.name}</option>`
-    ).join('');
+    ).join('') + `<option value="other">Other</option>`;
 
     const tr = document.createElement('tr');
     tr.id = `row-${id}`;
@@ -416,6 +416,13 @@
 
     const idx = productSel.value;
     if (idx === '') { productPrint.textContent = ''; document.getElementById(`name-edit-${id}`).value = ''; recalcRow(id); return; }
+
+    if (idx === 'other') {
+      document.getElementById(`name-edit-${id}`).value = '';
+      productPrint.textContent = '';
+      recalcRow(id);
+      return;
+    }
 
     const item = MENU[parseInt(idx)];
     productPrint.textContent = item.name;
