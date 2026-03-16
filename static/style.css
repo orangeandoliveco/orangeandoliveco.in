@@ -58,6 +58,56 @@ body {
   text-align: center;
 }
 
+.cover-description {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--olive-primary);
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.cover-contacts {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.cover-contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+  color: var(--olive-primary);
+  text-decoration: none;
+}
+
+.cover-contact-link:hover {
+  color: var(--accent-orange);
+}
+
+.cover-contact-link svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.6rem 1.6rem;
+  background-color: var(--accent-orange);
+  color: #fff;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 1rem;
+  letter-spacing: 0.3px;
+  transition: background-color 0.2s ease;
+}
+
+.button:hover {
+  background-color: #b45309;
+}
+
 .footer-text {
   font-size: 0.9rem;
   margin-top: 2rem;
